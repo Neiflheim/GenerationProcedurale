@@ -11,6 +11,7 @@ namespace Generation
         [SerializeField] private float _propagationSpeed;
         [SerializeField] private int _minHeight;
         [SerializeField] private GameObject _firePrefab;
+        [SerializeField] private GameObject _alreadyBurnPrefab;
         
         // Trees
         private GameObject[] _trees;
@@ -56,11 +57,11 @@ namespace Generation
                     // Cellular matrix
                     if (new Vector2Int(i, j) == _startingPosition)
                     {
-                        _cellularMatrixData[i, j] = new CellularData(true, 0);
+                        _cellularMatrixData[i, j] = new CellularData(1, 0);
                     }
                     else
                     {
-                        _cellularMatrixData[i, j] = new CellularData(false, 0);
+                        _cellularMatrixData[i, j] = new CellularData(0, 0);
                     }
                 }
             }
@@ -101,13 +102,20 @@ namespace Generation
                         
                         int height = (int)HeightmapToWorldPosition(i, j).y;
 
-                        if (height >= _minHeight && neighborsNumber == 1 || height >= _minHeight && neighborsNumber == 2)
+                        // CONDITION DE VIE
+                        if (_cellularMatrixData[i, j].State == 0 && neighborsNumber == 1 && height >= _minHeight
+                            || _cellularMatrixData[i, j].State == 0 && neighborsNumber == 2 &&  height >= _minHeight
+                            || _cellularMatrixData[i, j].State == 1 && _treesMatrix[i, j].Count != 0)
                         {
-                            cellularMatrixDataClone[i, j] = new CellularData(true, 0);
+                            cellularMatrixDataClone[i, j] = new CellularData(1, 0);
+                        }
+                        else if (_cellularMatrixData[i, j].State == 1 && _treesMatrix[i, j].Count == 0 || _cellularMatrixData[i, j].State == 2)
+                        {
+                            cellularMatrixDataClone[i, j] = new CellularData(2, 0);
                         }
                         else
                         {
-                            cellularMatrixDataClone[i, j] = new CellularData(false, 0);
+                            cellularMatrixDataClone[i, j] = new CellularData(0, 0);
                         }
                     }
                 }
@@ -130,17 +138,29 @@ namespace Generation
             {
                 for (int j = 0; j < _heightmapResolution; j++)
                 {
-                    if (_cellularMatrixData[i, j].IsOnFire)
+                    if (_cellularMatrixData[i, j].State == 1)
                     {
                         Vector3 position = HeightmapToWorldPosition(i, j);
-                        GameObject newFire = Instantiate(_firePrefab, new Vector3(position.x, 500, position.z), Quaternion.identity);
+                        GameObject newFire = Instantiate(_firePrefab, position, Quaternion.identity);
                         _fireObjects.Add(newFire);
                         
-                        foreach (GameObject obj in _treesMatrix[i, j])
-                        {
-                            DestroyImmediate(obj);
-                        }
-                        _treesMatrix[i, j].Clear();
+                        // foreach (GameObject obj in _treesMatrix[i, j])
+                        // {
+                        //     DestroyImmediate(obj);
+                        // }
+                        // _treesMatrix[i, j].Clear();
+                    }
+                    if (_cellularMatrixData[i, j].State == 2)
+                    {
+                        Vector3 position = HeightmapToWorldPosition(i, j);
+                        GameObject newFire = Instantiate(_alreadyBurnPrefab, position, Quaternion.identity);
+                        _fireObjects.Add(newFire);
+                        
+                        // foreach (GameObject obj in _treesMatrix[i, j])
+                        // {
+                        //     DestroyImmediate(obj);
+                        // }
+                        // _treesMatrix[i, j].Clear();
                     }
                 }
             }

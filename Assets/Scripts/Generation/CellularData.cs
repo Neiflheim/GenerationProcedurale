@@ -1,20 +1,21 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Generation
 {
     [Serializable]
     internal struct CellularData
     {
-        public bool IsOnFire;
+        [FormerlySerializedAs("IsOnFire")] public int State;
         public int NeighborsNumber;
         
         private List<Vector2Int> _neighbors;
 
-        public CellularData(bool isOnFire, int neighborsNumber)
+        public CellularData(int state, int neighborsNumber)
         {
-            IsOnFire = isOnFire;
+            State = state;
             NeighborsNumber = neighborsNumber;
             
             _neighbors = new List<Vector2Int>
@@ -34,7 +35,7 @@ namespace Generation
                 if (neighborPosition.x >=  matrix.GetLength(0) || neighborPosition.x <= 0 ||
                     neighborPosition.y >=  matrix.GetLength(0) || neighborPosition.y <= 0) continue;
 
-                if (matrix[neighborPosition.x, neighborPosition.y].IsOnFire)
+                if (matrix[neighborPosition.x, neighborPosition.y].State == 1)
                 {
                     NeighborsNumber++;
                 }
