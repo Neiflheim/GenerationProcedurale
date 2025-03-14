@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Generation
 {
     [Serializable]
     internal struct CellularData
     {
-        [FormerlySerializedAs("IsOnFire")] public int State;
+        public int State;
         public int NeighborsNumber;
         
         private List<Vector2Int> _neighbors;
